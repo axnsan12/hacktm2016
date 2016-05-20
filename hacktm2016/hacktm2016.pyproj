@@ -28,46 +28,17 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="api.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ratt.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="runserver.py" />
-    <Compile Include="hacktm2016\__init__.py" />
-    <Compile Include="hacktm2016\views.py" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="hacktm2016\" />
-    <Folder Include="hacktm2016\static\" />
-    <Folder Include="hacktm2016\static\content\" />
-    <Folder Include="hacktm2016\static\fonts\" />
-    <Folder Include="hacktm2016\static\scripts\" />
-    <Folder Include="hacktm2016\templates\" />
+    <Compile Include="init.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="requirements.txt" />
-    <Content Include="hacktm2016\static\content\bootstrap.css" />
-    <Content Include="hacktm2016\static\content\bootstrap.min.css" />
-    <Content Include="hacktm2016\static\content\site.css" />
-    <Content Include="hacktm2016\static\fonts\glyphicons-halflings-regular.eot" />
-    <Content Include="hacktm2016\static\fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="hacktm2016\static\fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="hacktm2016\static\fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="hacktm2016\static\scripts\bootstrap.js" />
-    <Content Include="hacktm2016\static\scripts\bootstrap.min.js" />
-    <Content Include="hacktm2016\static\scripts\jquery-1.10.2.intellisense.js" />
-    <Content Include="hacktm2016\static\scripts\jquery-1.10.2.js" />
-    <Content Include="hacktm2016\static\scripts\jquery-1.10.2.min.js" />
-    <Content Include="hacktm2016\static\scripts\jquery-1.10.2.min.map" />
-    <Content Include="hacktm2016\static\scripts\jquery.validate-vsdoc.js" />
-    <Content Include="hacktm2016\static\scripts\jquery.validate.js" />
-    <Content Include="hacktm2016\static\scripts\jquery.validate.min.js" />
-    <Content Include="hacktm2016\static\scripts\jquery.validate.unobtrusive.js" />
-    <Content Include="hacktm2016\static\scripts\jquery.validate.unobtrusive.min.js" />
-    <Content Include="hacktm2016\static\scripts\modernizr-2.6.2.js" />
-    <Content Include="hacktm2016\static\scripts\respond.js" />
-    <Content Include="hacktm2016\static\scripts\respond.min.js" />
-    <Content Include="hacktm2016\static\scripts\_references.js" />
-    <Content Include="hacktm2016\templates\about.html" />
-    <Content Include="hacktm2016\templates\contact.html" />
-    <Content Include="hacktm2016\templates\index.html" />
-    <Content Include="hacktm2016\templates\layout.html" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Web.targets" />
   <!-- Specify pre- and post-build commands in the BeforeBuild and 
