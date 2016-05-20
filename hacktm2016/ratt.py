@@ -143,13 +143,3 @@ def get_line_times(line_id: int, station_ids: List[int]) -> Sequence[Arrival]:
 			response.close()
 
 	return arrivals
-
-
-stations = [3106, 4464, 4502, 8080, 2810, 3620, 2920, 6040, 2923, 2924, 5962, 2926, 2928, 5961, 2947, 5960, 6260, 2948, 2946, 2929, 2927, 5963, 2925, 2922, 6041, 2921, 3602, 2821, 2822, 2889, 4501, 4465, 2768]
-
-from time import time as clock
-start = clock()
-arrivals = get_line_times(1207, stations)
-end = clock()
-print(arrivals)
-print("%s seconds for %s requests" % (end - start, len(stations)))
