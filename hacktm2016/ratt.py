@@ -35,18 +35,8 @@ class Station:
 		self.raw_name = raw_name
 		self.friendly_name = friendly_name
 		self.junction_name = junction_name
-<<<<<<< HEAD
 		self.lat = float(lat) if lat is not None else None
 		self.lng = float(lng) if lng is not None else None
-=======
-		try:
-			self.lat = float(lat)
-			self.lng = float(lng)
-		except TypeError:
-			self.lat = 0.0
-			self.lng = 0.0
-
->>>>>>> origin/master
 		self.poi_url = poi_url
 
 	def __str__(self):

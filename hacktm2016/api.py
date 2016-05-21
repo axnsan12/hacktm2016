@@ -30,7 +30,6 @@ def get_nearby_stations():
 		return response
 
 	stations = data.get_stations()
->>>>>>> origin/master
 	sorted_list = []
 
 	for station in stations:
@@ -45,13 +44,13 @@ def get_nearby_stations():
 	return jsonify({'stations': [sorted_list[index][0].__dict__ for index in range(count)]})
 
 
-<<<<<<< HEAD
 @app.route("/api/get_arrival_times")
 def get_arrival_times():
 	line_id = int(request.args.get('line_id'))
 	route_id = int(request.args.get('route_id'))
 	return jsonify({'arrivals': [arrival.__dict__ for arrival in data.get_arrivals(line_id)[route_id]] })
-=======
+
+
 @app.route("/api/get_routes")
 def get_routes():
 	line_id = int(request.args.get('line_id'))
@@ -68,5 +67,3 @@ def get_routes():
 		routes_dict.append({'line_id': route.line_id, 'route_id': route.route_id, 'route_name': route.route_name, 'stations': stations_dict})
 
 	return jsonify({'routes': route for route in routes_dict})
-
->>>>>>> origin/master
