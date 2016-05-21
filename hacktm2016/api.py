@@ -1,9 +1,6 @@
-from math import sqrt
-
 import data
 from init import app
 from flask import jsonify, request
-import importer
 
 
 @app.route("/api/get_stations")
@@ -14,8 +11,12 @@ def get_stations():
 
 @app.route("/api/get_lines")
 def get_lines():
-	line_types = {line_type for line_type in request.args.get("line_types").split(',') if line_type}
-	lines = [line for line in data.get_lines() if line.line_type in line_types]
+	try:
+		line_types = {line_type for line_type in request.args.get("line_types").split(',') if line_type}
+		lines = [line for line in data.get_lines() if line.line_type in line_types]
+	except (AttributeError, TypeError, ValueError):
+		lines = data.get_lines()
+
 	return jsonify({'lines': [line.__dict__ for line in lines]})
 
 
@@ -30,19 +31,10 @@ def get_nearby_stations():
 		response.status_code = 400
 		return response
 
-	stations = data.get_stations().values()
-	sorted_list = []
+	stations = [station for station in data.get_stations().values() if station.lat is not None and station.lng is not None]
+	sorted_list = sorted(stations, key=lambda station: ((lat - station.lat) ** 2 + (lng - station.lng) ** 2) ** 0.5)
 
-	for station in stations:
-		try:
-			dist = ((lat - station.lat) ** 2 + (lng - station.lng) ** 2) ** 0.5
-			sorted_list.append((station, dist))
-		except TypeError:
-			pass
-
-	sorted_list.sort(key=lambda tup: tup[1])
-
-	return jsonify({'stations': [sorted_list[index][0].__dict__ for index in range(count)]})
+	return jsonify({'stations': [station.__dict__ for station in sorted_list[:count]]})
 
 
 @app.route("/api/get_arrival_times")
@@ -74,3 +66,17 @@ def get_routes():
 def get_bike_stations():
 	return jsonify({'bike_stations': [station.__dict__ for station in data.get_bike_stations()]})
 
+
+@app.route("/api/get_closest_bike_station")
+def get_closest_bike_station():
+	try:
+		lat = float(request.args.get('lat'))
+		lng = float(request.args.get('lng'))
+	except (ValueError, TypeError) as e:
+		response = jsonify({'error': str(e)})
+		response.status_code = 400
+		return response
+
+	sorted_list = sorted(data.get_bike_stations(), key=lambda station: ((lat - station.lat) ** 2 + (lng - station.lng) ** 2) ** 0.5)
+
+	return jsonify(sorted_list[0].__dict__)

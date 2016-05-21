@@ -36,7 +36,7 @@ def get_arrivals(line_id: int):
 	return ratt.get_arrivals_from_infotrafic(line_id, get_stations())
 
 
-@cache.cache('bike_stations', expire=3600 * 24)
+@cache.cache('bike_stations', expire=90)
 def get_bike_stations():
 	return velo.get_stations_from_velo()
 
