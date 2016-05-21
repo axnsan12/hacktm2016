@@ -20,9 +20,15 @@ def get_lines():
 
 @app.route("/api/get_nearby_stations")
 def get_nearby_stations():
-	lat = float(request.args.get('lat'))
-	lng = float(request.args.get('lng'))
-	count = int(request.args.get('count'))
+	try:
+		lat = float(request.args.get('lat'))
+		lng = float(request.args.get('lng'))
+		count = int(request.args.get('count')) if 'count' in request.args else 10
+	except (ValueError, TypeError) as e:
+		response = jsonify({'error': str(e)})
+		response.status_code = 400
+		return response
+
 	stations = data.get_stations()
 	sorted_list = []
 
@@ -36,4 +42,22 @@ def get_nearby_stations():
 	sorted_list.sort(key=lambda tup: tup[1])
 
 	return jsonify({'stations': [sorted_list[index][0].__dict__ for index in range(count)]})
+
+
+@app.route("/api/get_routes")
+def get_routes():
+	line_id = int(request.args.get('line_id'))
+	all_routes = data.get_routes()
+
+	routes = all_routes[line_id]
+	routes_dict = []
+
+	for route in routes:
+		stations_dict = []
+		for station in route.stations:
+			stations_dict.append(station.__dict__)
+
+		routes_dict.append({'line_id': route.line_id, 'route_id': route.route_id, 'route_name': route.route_name, 'stations': stations_dict})
+
+	return jsonify({'routes': route for route in routes_dict})
 

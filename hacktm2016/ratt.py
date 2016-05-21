@@ -7,6 +7,7 @@ import traceback
 import bs4
 import requests
 import grequests
+
 import importer
 
 station_time_url = 'http://www.ratt.ro/txt/afis_msg.php'
@@ -34,8 +35,13 @@ class Station:
 		self.raw_name = raw_name
 		self.friendly_name = friendly_name
 		self.junction_name = junction_name
-		self.lat = float(lat)
-		self.lng = float(lng)
+		try:
+			self.lat = float(lat)
+			self.lng = float(lng)
+		except TypeError:
+			self.lat = 0.0
+			self.lng = 0.0
+
 		self.poi_url = poi_url
 
 	def __str__(self):
