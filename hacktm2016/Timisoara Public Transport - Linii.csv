@@ -1,0 +1,41 @@
+LineID,LineName,FriendlyName,LineType,RouteName1,RouteName2
+1207,3,3,bus,FZB,Gara
+1066,13,13,bus,Pod C.F,Marasti
+1146,21,21,bus,Sc. Gen Plopi,Banatul
+2566,22,22,bus,Posta Mare,Albastrelelor
+1226,28,28,bus,Titeica,Lugojului
+2626,29,29,bus,Campului,Lugojului
+1546,32,32,bus,Gara de Sud,Mocioni
+1046,33,33,bus,Pod C. Sagului,Catedrala
+2466,33b,33b,bus,Metro,P-ta Mocioni
+886,40,40,bus,Stuparilor,Grozavescu
+1406,46,46,bus,Padurea Verde,Bastion
+1550,E1,E1,bus,Selgros,Pod C. Sagului
+1551,E2,E2,bus,Stuparilor,AEM
+1552,E3,E3,bus,Gara de Nord,Apicultorilor
+1926,E4,E4,bus,Aeroport,Bastion
+2486,E4b,E4b,bus,Aeroport,Ghe. Baritiu
+1928,E6,E6,bus,PITT,P-ta Consiliul Europei
+2026,E7,E7,bus,FZB,Posta Mare
+1547,E8,E8,bus,Pod C. Sagului,Albastrelelor
+1986,M35,M35,bus,Giarmata Vii,Bastion
+2506,M44,M44,bus,Becicherecu Mic,TM
+990,Tb11,11,trolley,Arena Aqua,Gheorghe Baritiu
+1006,Tb14,14,trolley,Ion Ionescu de la Brad,Gheorghe Baritiu
+989,Tb15,15,trolley,Versului,Posta Mare
+1206,Tb16,16,trolley,Bulevardul Sudului,Posta Mare
+1086,Tb17,17,trolley,Baader,Agronomie
+1166,Tb18,18,trolley,Liege,Solventul
+2786,M11,M11,trolley,Ghiroda,Gheorghe Baritiu
+2766,M14,M14,trolley,Dumbravita,Gheorghe Baritiu
+1106,Tv1,1,tram,UMT,Gara
+1126,Tv2,2,tram,UMT,Dambovita
+1266,Tv4,4,tram,Ciarda Rosie,Torontalului
+1553,Tv5,5,tram,UMT,Ronat
+2686,Tv6,6,tram,"P-ta Maria,P-ta Traian,Balcescu","P-ta Maria,P-ta Traian,Balcescu"
+2706,Tv6,6,tram,"Balcescu,P-ta Traian, P-ta Maria","Balcescu,P-ta Traian, P-ta Maria"
+1556,Tv7,7,tram,"Dambovita,Balcescu,Mures","Dambovita,Balcescu,Mures"
+1557,Tv7,7,tram,"Mures,Balcescu,Dambovita","Mures,Balcescu,Dambovita"
+1558,Tv8,8,tram,AEM,Gara
+2406,Tv9,9,tram,Dambovita,AEM
+2726,Tv10,10,tram,UMT,Torontalului

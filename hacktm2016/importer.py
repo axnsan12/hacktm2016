@@ -10,7 +10,7 @@ def parse_stations_from_csv(filename: str):
 		               'ShortStationName', 'JunctionName', 'Lat', 'Long', 'Invalid', 'Verified',
 		               'VerificationDate', 'GoogleMapsID', 'InfoComments']
 
-		filereader = csv.DictReader(csvfile, field_names, delimiter = ',', quotechar = '"')
+		filereader = csv.DictReader(csvfile, field_names, delimiter=',', quotechar='"')
 		for row in filereader:
 			try:
 				if row['Invalid'] != 'TRUE':
@@ -34,7 +34,7 @@ def parse_lines_from_csv(filename: str):
 		filereader = csv.DictReader(csvfile, delimiter=',', quotechar ='"')
 
 		for row in filereader:
-			line = ratt.Line(int(row['LineID']), row['LineName'], row['LineType'], row['RouteName1'], row['RouteName2'])
+			line = ratt.Line(int(row['LineID']), row['LineName'], row['FriendlyName'], row['LineType'], row['RouteName1'], row['RouteName2'])
 			result.append(line)
 
 		return result

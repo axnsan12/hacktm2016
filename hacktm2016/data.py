@@ -13,7 +13,7 @@ cache_opts = {
 cache = CacheManager(**parse_cache_config_options(cache_opts))
 
 known_stations_csv = "Lines Stations and Junctions - Timisoara Public Transport - Denumiri-20152012.csv"
-known_lines_csv = "Lines Stations and Junctions - Timisoara Public Transport - Sheet1.csv"
+known_lines_csv = "Timisoara Public Transport - Linii.csv"
 
 
 @cache.cache('all_stations', expire=3600 * 24)
