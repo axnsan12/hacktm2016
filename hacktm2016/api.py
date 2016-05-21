@@ -20,12 +20,6 @@ def get_lines():
 
 @app.route("/api/get_nearby_stations")
 def get_nearby_stations():
-<<<<<<< HEAD
-	lat = float(request.args.get('lat'))
-	lng = float(request.args.get('lng'))
-	count = int(request.args.get('count'))
-	stations = data.get_stations().values()
-=======
 	try:
 		lat = float(request.args.get('lat'))
 		lng = float(request.args.get('lng'))
