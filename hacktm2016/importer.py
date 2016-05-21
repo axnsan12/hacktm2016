@@ -32,7 +32,7 @@ def parse_stations_from_csv(filename: str):
 	return list(result)
 
 
-def parse_lines_from_csv(filename: str) -> List[Line]:
+def parse_lines_from_csv(filename: str):
 	with open(filename, newline='') as csvfile:
 		result = []
 
@@ -40,7 +40,7 @@ def parse_lines_from_csv(filename: str) -> List[Line]:
 
 		for row in filereader:
 
-			line = Line(row['LineID'], row['LineName'], row['LineType'], row['RouteName1'], row['RouteName2'])
+			line = ratt.Line(row['LineID'], row['LineName'], row['LineType'], row['RouteName1'], row['RouteName2'])
 			result.append(line)
 
 		return result

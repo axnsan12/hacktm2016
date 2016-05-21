@@ -34,8 +34,8 @@ class Station:
 		self.raw_name = raw_name
 		self.friendly_name = friendly_name
 		self.junction_name = junction_name
-		self.lat = lat
-		self.lng = lng
+		self.lat = float(lat)
+		self.lng = float(lng)
 		self.poi_url = poi_url
 
 	def __str__(self):
