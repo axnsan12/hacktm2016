@@ -77,7 +77,31 @@ class Line:
 		return not self == other
 
 	def __hash__(self):
-		return hash(self.line_name)
+		return hash(self.line_id)
+
+
+class Route:
+	def __init__(self, route_id: int, route_name: str, line_id: int, stations: Sequence[Station]):
+		self.route_id = route_id
+		self.route_name = route_name
+		self.line_id = line_id
+		self.stations = stations
+
+	def __str__(self):
+		return self.route_name
+
+	def __repr__(self):
+		return "Route(route_id=%r, route_name=%r, line_id=%r, stations=%r)" % \
+		       (self.route_id, self.route_name, self.line_id, self.stations)
+
+	def __eq__(self, other) -> bool:
+		return self.line_id == other.line_id and self.route_id == other.route_id
+
+	def __ne__(self, other) -> bool:
+		return not self == other
+
+	def __hash__(self):
+		return hash(self.line_id) * 101 + hash(self.route_id)
 
 
 def parse_arrival(now: datetime, line_id: int, station_id: int, arrival: str) -> Arrival:
@@ -119,7 +143,7 @@ def parse_arrival(now: datetime, line_id: int, station_id: int, arrival: str) ->
 	return Arrival(line_id, station_id, arrival, minutes_left, real_time)
 
 
-def parse_arrival_from_response(now: datetime, line_id: int, station_id:int, response: requests.Response) -> Arrival:
+def parse_arrival_from_response(now: datetime, line_id: int, station_id: int, response: requests.Response) -> Arrival:
 	"""
 	Parse a single arrival time from a html response from the http://www.ratt.ro/txt/ api.
 
@@ -173,7 +197,6 @@ def get_line_times(line_id: int, station_ids: List[int]) -> Sequence[Arrival]:
 	responses = list(grequests.map(gets, exception_handler=exception_handler, size=20))
 	tz = pytz.timezone("Europe/Bucharest")
 	now = tzlocal.get_localzone().localize(datetime.now()).astimezone(tz).replace(second=0, microsecond=0)
-	all_ok = True
 	for index, response in enumerate(responses):
 		try:
 			arrivals.append(parse_arrival_from_response(now, line_id, station_ids[index], response))
@@ -181,7 +204,6 @@ def get_line_times(line_id: int, station_ids: List[int]) -> Sequence[Arrival]:
 			traceback.print_exc()
 			print(response.text)
 			arrivals.append(Arrival(line_id, station_ids[index], "xx:xx", -1, False))
-			all_ok = False
 		finally:
 			response.close()
 
@@ -223,11 +245,12 @@ def get_route_info_from_infotraffic(known_lines_csv: str, known_stations_csv: st
 	        grequests.get(root + 'trol.php', stream=False),
 	        grequests.get(root + 'auto.php', stream=False)]
 
-	known_lines = { line.line_id: line for line in [] }
+	known_lines = { line.line_id: line for line in importer.parse_lines_from_csv(known_lines_csv) }
 	known_lines = known_lines  # type: Dict[int, Line]
 	known_stations = { station.raw_name: station for station in importer.parse_stations_from_csv(known_stations_csv) }
 	known_stations = known_stations  # type: Dict[str, Station]
 	line_id_re = re.compile("param1=(\d+)")
+	line_id_to_routes = {}  # type: Dict[int, Tuple[Route, Route]]
 	for page in grequests.imap(urls, size=len(urls), exception_handler=exception_handler):
 		page.raise_for_status()
 		if page.status_code == requests.codes.ok:
@@ -252,11 +275,31 @@ def get_route_info_from_infotraffic(known_lines_csv: str, known_stations_csv: st
 				routes = parse_arrivals_from_infotrafic(line_id, known_stations, line_response)
 				line = known_lines.get(line_id, None)
 				line_name = line.line_name if line is not None else unknown_lines.get(line_id, "unknown")
+				route1 = route2 = None
 				for route_id, route in enumerate(routes):
+					valid_stations = []
 					for station, arrival in route:
 						if not isinstance(station, Station):
 							print("WARNING: unknown station '{raw_station_name}' encountered in route {route_id} of line {line_name} (line ID: {line_id})"
 							      .format(line_name=line_name, line_id=line_id, route_id=route_id, raw_station_name=station))
-						elif not station.lng or not station.lat:
-							print("WARNING: station '{station_name}' (station ID: {station_id}) has no GPS coordinates defined"
-							      .format(station_name=station.friendly_name, station_id=station.station_id))
+						else:
+							if not station.lng or not station.lat:
+								print("WARNING: station '{station_name}' (station ID: {station_id}) has no GPS coordinates defined"
+								      .format(station_name=station.friendly_name, station_id=station.station_id))
+							valid_stations.append(station)
+
+					if valid_stations and line is not None:
+						if route_id == 0:
+							route1 = Route(route_id, line.route_name_1, line.line_id, valid_stations)
+						elif route_id == 1:
+							route2 = Route(route_id, line.route_name_2, line.line_id, valid_stations)
+
+				if route1 is not None and route2 is not None:
+					line_id_to_routes[line.line_id] = (route1, route2)
+
+	return line_id_to_routes
+
+
+
+
+

@@ -15,7 +15,6 @@ def parse_stations_from_csv(filename: str):
 
 		filereader = csv.DictReader(csvfile, field_names, delimiter = ',', quotechar = '"')
 		for row in filereader:
-
 			try:
 				if row['Invalid'] != 'TRUE':
 					try:
@@ -23,7 +22,7 @@ def parse_stations_from_csv(filename: str):
 					except ValueError:
 						lat, lng = None, None
 					station = ratt.Station(int(row['StationID']), row['RawStationName'], row['ShortStationName'],
-					                  row['JunctionName'], lat, lng, row['GoogleMapsID'])
+					                       row['JunctionName'], lat, lng, row['GoogleMapsID'])
 
 					result.add(station)
 			except ValueError:
@@ -32,15 +31,13 @@ def parse_stations_from_csv(filename: str):
 	return list(result)
 
 
-def parse_lines_from_csv(filename: str) -> List[Line]:
+def parse_lines_from_csv(filename: str):
 	with open(filename, newline='') as csvfile:
 		result = []
-
 		filereader = csv.DictReader(csvfile, delimiter=',', quotechar ='"')
 
 		for row in filereader:
-
-			line = Line(row['LineID'], row['LineName'], row['LineType'], row['RouteName1'], row['RouteName2'])
+			line = ratt.Line(int(row['LineID']), row['LineName'], row['LineType'], row['RouteName1'], row['RouteName2'])
 			result.append(line)
 
 		return result

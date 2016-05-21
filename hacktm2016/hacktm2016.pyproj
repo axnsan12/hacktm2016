@@ -31,11 +31,15 @@
     <Compile Include="api.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="data.py" />
+    <Compile Include="importer.py" />
     <Compile Include="ratt.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="runserver.py" />
     <Compile Include="init.py" />
+    <Compile Include="test.py" />
+    <Compile Include="util.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="requirements.txt" />
