@@ -4,7 +4,7 @@ from datetime import datetime, time, timedelta
 import pytz
 import tzlocal
 import traceback
-
+import bs4
 import requests
 import grequests
 
@@ -80,6 +80,20 @@ class Line:
 
 
 def parse_arrival(now: datetime, line_id: int, station_id: int, arrival: str) -> Arrival:
+	"""
+	Parse arrival time from a string of the form "hh:mm", "mm min.", ">>".
+
+	Parameters
+	----------
+	now current time in Europe/Bucharest timezone, for calculating minutes until arrival for absolute timestamps
+	line_id line ID
+	station_id station ID
+	arrival arrival string
+
+	Returns
+	-------
+	Parsed arrival time
+	"""
 	minutes_left = -1  # type: int
 	real_time = False  # type: bool
 
@@ -105,6 +119,20 @@ def parse_arrival(now: datetime, line_id: int, station_id: int, arrival: str) ->
 
 
 def parse_arrival_from_response(now: datetime, line_id: int, station_id:int, response: requests.Response) -> Arrival:
+	"""
+	Parse a single arrival time from a html response from the http://www.ratt.ro/txt/ api.
+
+	Parameters
+	----------
+	now current time in Europe/Bucharest timezone, for calculating minutes until arrival for absolute timestamps
+	line_id line ID
+	station_id station ID
+	response HTML response from http://www.ratt.ro/txt/afis_msg.php?id_traseu={line_id}&id_statie={station_id}
+
+	Returns
+	-------
+	Parsed arrival time
+	"""
 	response.raise_for_status()
 	arrival = "xx:xx"  # type: str
 	if response.status_code == requests.codes.ok:
@@ -124,6 +152,17 @@ def exception_handler(request: grequests.AsyncRequest, exception: Exception):
 
 
 def get_line_times(line_id: int, station_ids: List[int]) -> Sequence[Arrival]:
+	"""
+	Get all arrival times for a given line by individual requests to http://www.ratt.ro/txt/
+	Parameters
+	----------
+	line_id
+	station_ids
+
+	Returns
+	-------
+	Station arrival times.
+	"""
 	gets = []
 	for station_id in station_ids:
 		params = {'id_traseu': line_id, 'id_statie': station_id}
@@ -146,3 +185,31 @@ def get_line_times(line_id: int, station_ids: List[int]) -> Sequence[Arrival]:
 			response.close()
 
 	return arrivals
+
+
+def parse_arrivals_from_infotrafic(line_id: int, response: requests.Response) -> Sequence[Station]:
+	response.raise_for_status()
+	if response.status_code == requests.codes.ok:
+		bs = bs4.BeautifulSoup(response.text, "html.parser")
+		prevcolor = None
+		datacolor = '00BFFF'
+		routes = []
+		route = None
+		tz = pytz.timezone("Europe/Bucharest")
+		now = tzlocal.get_localzone().localize(datetime.now()).astimezone(tz).replace(second=0, microsecond=0)
+		for row in bs.find_all("table"):
+			if row['bgcolor'] == datacolor:
+				if prevcolor != datacolor:
+					route = []
+					routes.append(route)
+
+				cols = row.find_all("b")
+				line_name = cols[0].text
+				raw_station_name = cols[1].text
+				arrival = parse_arrival(now, line_id, -1, cols[2].text)
+				route.append(arrival)
+
+			prevcolor = row['bgcolor']
+
+		return routes
+
