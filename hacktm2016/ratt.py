@@ -1,5 +1,5 @@
 import re
-from typing import List, Sequence
+from typing import List, Sequence, Dict, Tuple, Union
 from datetime import datetime, time, timedelta
 import pytz
 import tzlocal
@@ -7,6 +7,7 @@ import traceback
 import bs4
 import requests
 import grequests
+import importer
 
 station_time_url = 'http://www.ratt.ro/txt/afis_msg.php'
 
@@ -166,7 +167,7 @@ def get_line_times(line_id: int, station_ids: List[int]) -> Sequence[Arrival]:
 		gets.append(grequests.get(station_time_url, params=params, stream=False))
 
 	arrivals = []
-	responses = list(grequests.map(gets, exception_handler=exception_handler))
+	responses = list(grequests.map(gets, exception_handler=exception_handler, size=20))
 	tz = pytz.timezone("Europe/Bucharest")
 	now = tzlocal.get_localzone().localize(datetime.now()).astimezone(tz).replace(second=0, microsecond=0)
 	all_ok = True
@@ -184,7 +185,7 @@ def get_line_times(line_id: int, station_ids: List[int]) -> Sequence[Arrival]:
 	return arrivals
 
 
-def parse_arrivals_from_infotrafic(line_id: int, response: requests.Response) -> Sequence[Station]:
+def parse_arrivals_from_infotrafic(line_id: int, stations: Dict[str, Station], response: requests.Response) -> List[List[Tuple[Union[Station,str], Arrival]]]:
 	response.raise_for_status()
 	if response.status_code == requests.codes.ok:
 		bs = bs4.BeautifulSoup(response.text, "html.parser")
@@ -201,12 +202,58 @@ def parse_arrivals_from_infotrafic(line_id: int, response: requests.Response) ->
 					routes.append(route)
 
 				cols = row.find_all("b")
-				line_name = cols[0].text
-				raw_station_name = cols[1].text
-				arrival = parse_arrival(now, line_id, -1, cols[2].text)
-				route.append(arrival)
+				raw_station_name = cols[1].text.strip()
+				station = stations.get(raw_station_name, None)
+				arrival = parse_arrival(now, line_id, station.station_id if station else -1, cols[2].text)
+				route.append((station if station is not None else raw_station_name, arrival))
 
 			prevcolor = row['bgcolor']
 
-		return routes
+		return routes if route else None
 
+	return None
+
+
+def get_route_info_from_infotraffic(known_lines_csv: str, known_stations_csv: str):
+	root = 'http://86.122.170.105:61978/html/timpi/'
+	urls = [grequests.get(root + 'tram.php', stream=False),
+	        grequests.get(root + 'trol.php', stream=False),
+	        grequests.get(root + 'auto.php', stream=False)]
+
+	known_lines = { line.line_id: line for line in [] }
+	known_lines = known_lines  # type: Dict[int, Line]
+	known_stations = { station.raw_name: station for station in importer.parse_stations_from_csv(known_stations_csv) }
+	known_stations = known_stations  # type: Dict[str, Station]
+	line_id_re = re.compile("param1=(\d+)")
+	for page in grequests.imap(urls, size=len(urls), exception_handler=exception_handler):
+		page.raise_for_status()
+		if page.status_code == requests.codes.ok:
+			soup = bs4.BeautifulSoup(page.text, "html.parser")
+			unknown_lines = { }  # type: Dict[int, str]
+			line_requests = []
+			for a in soup.select("div p a"):
+				line_id = int(line_id_re.search(a['href']).group(1))
+				line = known_lines.get(line_id, None)
+				if not line:
+					line_name = a['title'] if a.has_attr('title') else None
+					if line_name is None:
+						img = a.select("img")[0]
+						line_name = img['alt'] if img and img.has_attr('alt') else 'unknown'
+					unknown_lines[line_id] = line_name
+					print("WARNING: unknown line '{line_name}' (line ID: {line_id}) encountered at {url}"
+					      .format(line_name=line_name, line_id=line_id, url=page.url))
+				line_requests.append(grequests.get(root + a['href'], stream=False))
+
+			for line_response in grequests.imap(line_requests, size=6, exception_handler=exception_handler):
+				line_id = int(line_id_re.search(line_response.url).group(1))
+				routes = parse_arrivals_from_infotrafic(line_id, known_stations, line_response)
+				line = known_lines.get(line_id, None)
+				line_name = line.line_name if line is not None else unknown_lines.get(line_id, "unknown")
+				for route_id, route in enumerate(routes):
+					for station, arrival in route:
+						if not isinstance(station, Station):
+							print("WARNING: unknown station '{raw_station_name}' encountered in route {route_id} of line {line_name} (line ID: {line_id})"
+							      .format(line_name=line_name, line_id=line_id, route_id=route_id, raw_station_name=station))
+						elif not station.lng or not station.lat:
+							print("WARNING: station '{station_name}' (station ID: {station_id}) has no GPS coordinates defined"
+							      .format(station_name=station.friendly_name, station_id=station.station_id))

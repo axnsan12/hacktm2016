@@ -1,10 +1,10 @@
 from typing import List
 
-from ratt import Station
+import ratt
 import csv
 
 
-def parse_stations_from_csv(filename: str) -> List[Station]:
+def parse_stations_from_csv(filename: str):
 	with open(filename, newline='') as csvfile:
 		result = set()
 
@@ -17,8 +17,12 @@ def parse_stations_from_csv(filename: str) -> List[Station]:
 
 			try:
 				if row['Invalid'] != 'TRUE':
-					station = Station(int(row['StationID']), row['RawStationName'], row['ShortStationName'],
-					                  row['JunctionName'], float(row['Lat']), float(row['Long']), row['GoogleMapsID'])
+					try:
+						lat, lng = float(row['Lat']), float(row['Long'])
+					except ValueError:
+						lat, lng = None, None
+					station = ratt.Station(int(row['StationID']), row['RawStationName'], row['ShortStationName'],
+					                  row['JunctionName'], lat, lng, row['GoogleMapsID'])
 
 					result.add(station)
 			except ValueError:
