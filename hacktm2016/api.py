@@ -14,7 +14,8 @@ def get_stations():
 
 @app.route("/api/get_lines")
 def get_lines():
-	lines = data.get_lines()
+	line_types = {line_type for line_type in request.args.get("line_types").split(',') if line_type}
+	lines = [line for line in data.get_lines() if line.line_type in line_types]
 	return jsonify({'lines': [line.__dict__ for line in lines]})
 
 
@@ -29,7 +30,7 @@ def get_nearby_stations():
 		response.status_code = 400
 		return response
 
-	stations = data.get_stations()
+	stations = data.get_stations().values()
 	sorted_list = []
 
 	for station in stations:
