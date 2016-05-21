@@ -8,7 +8,7 @@ import importer
 
 @app.route("/api/get_stations")
 def get_stations():
-	stations = data.get_stations()
+	stations = data.get_stations().values()
 	return jsonify({'stations': [station.__dict__ for station in stations]})
 
 
@@ -23,7 +23,7 @@ def get_nearby_stations():
 	lat = float(request.args.get('lat'))
 	lng = float(request.args.get('lng'))
 	count = int(request.args.get('count'))
-	stations = data.get_stations()
+	stations = data.get_stations().values()
 	sorted_list = []
 
 	for station in stations:
@@ -37,3 +37,9 @@ def get_nearby_stations():
 
 	return jsonify({'stations': [sorted_list[index][0].__dict__ for index in range(count)]})
 
+
+@app.route("/api/get_arrival_times")
+def get_arrival_times():
+	line_id = int(request.args.get('line_id'))
+	route_id = int(request.args.get('route_id'))
+	return jsonify({'arrivals': [arrival.__dict__ for arrival in data.get_arrivals(line_id)[route_id]] })

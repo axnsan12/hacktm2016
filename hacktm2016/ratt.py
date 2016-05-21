@@ -34,8 +34,8 @@ class Station:
 		self.raw_name = raw_name
 		self.friendly_name = friendly_name
 		self.junction_name = junction_name
-		self.lat = float(lat)
-		self.lng = float(lng)
+		self.lat = float(lat) if lat is not None else None
+		self.lng = float(lng) if lng is not None else None
 		self.poi_url = poi_url
 
 	def __str__(self):
@@ -210,7 +210,7 @@ def get_line_times(line_id: int, station_ids: List[int]) -> Sequence[Arrival]:
 	return arrivals
 
 
-def parse_arrivals_from_infotrafic(line_id: int, stations: Dict[str, Station], response: requests.Response) -> List[List[Tuple[Union[Station,str], Arrival]]]:
+def parse_arrivals_from_infotrafic(line_id: int, stations: Dict[str, Station], response: requests.Response, include_unknown_stations: bool = False) -> Tuple[List[Tuple[Union[Station,str], Arrival]]]:
 	response.raise_for_status()
 	if response.status_code == requests.codes.ok:
 		bs = bs4.BeautifulSoup(response.text, "html.parser")
@@ -230,7 +230,8 @@ def parse_arrivals_from_infotrafic(line_id: int, stations: Dict[str, Station], r
 				raw_station_name = cols[1].text.strip()
 				station = stations.get(raw_station_name, None)
 				arrival = parse_arrival(now, line_id, station.station_id if station else -1, cols[2].text)
-				route.append((station if station is not None else raw_station_name, arrival))
+				if station is not None or include_unknown_stations:
+					route.append((station if station is not None else raw_station_name, arrival))
 
 			prevcolor = row['bgcolor']
 
@@ -239,7 +240,7 @@ def parse_arrivals_from_infotrafic(line_id: int, stations: Dict[str, Station], r
 	return None
 
 
-def get_route_info_from_infotraffic(known_lines_csv: str, known_stations_csv: str):
+def get_route_info_from_infotraffic(known_lines_csv: str, known_stations_csv: str)-> Dict[int, Tuple[Route, Route]]:
 	root = 'http://86.122.170.105:61978/html/timpi/'
 	urls = [grequests.get(root + 'tram.php', stream=False),
 	        grequests.get(root + 'trol.php', stream=False),
@@ -272,7 +273,7 @@ def get_route_info_from_infotraffic(known_lines_csv: str, known_stations_csv: st
 
 			for line_response in grequests.imap(line_requests, size=6, exception_handler=exception_handler):
 				line_id = int(line_id_re.search(line_response.url).group(1))
-				routes = parse_arrivals_from_infotrafic(line_id, known_stations, line_response)
+				routes = parse_arrivals_from_infotrafic(line_id, known_stations, line_response, include_unknown_stations=True)
 				line = known_lines.get(line_id, None)
 				line_name = line.line_name if line is not None else unknown_lines.get(line_id, "unknown")
 				route1 = route2 = None
@@ -299,6 +300,11 @@ def get_route_info_from_infotraffic(known_lines_csv: str, known_stations_csv: st
 
 	return line_id_to_routes
 
+
+def get_arrivals_from_infotrafic(line_id: int, stations: Dict[str, Station]) -> Tuple[Sequence[Arrival], Sequence[Arrival]]:
+	response = requests.get('http://86.122.170.105:61978/html/timpi/sens0.php', params={'param1': line_id})
+	routes = parse_arrivals_from_infotrafic(line_id, stations, response)
+	return [arrival for station, arrival in routes[0]], [arrival for station, arrival in routes[1]]
 
 
 

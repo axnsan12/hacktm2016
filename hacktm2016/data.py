@@ -15,16 +15,21 @@ known_stations_csv = "Lines Stations and Junctions - Timisoara Public Transport 
 known_lines_csv = "Lines Stations and Junctions - Timisoara Public Transport - Sheet1.csv"
 
 
-@cache.cache('all_stations', expire=3600*24)
+@cache.cache('all_stations', expire=3600 * 24)
 def get_stations():
-	return importer.parse_stations_from_csv(known_stations_csv)
+	return { station.raw_name: station for station in importer.parse_stations_from_csv(known_stations_csv) }
 
 
-@cache.cache('all_lines', expire=3600*24)
+@cache.cache('all_lines', expire=3600 * 24)
 def get_lines():
 	return importer.parse_lines_from_csv(known_lines_csv)
 
 
-@cache.cache('all_routes', expire=3600*24)
+@cache.cache('all_routes', expire=3600 * 24)
 def get_routes():
 	return ratt.get_route_info_from_infotraffic(known_lines_csv, known_stations_csv)
+
+
+@cache.cache('line_arrivals', expire=30)
+def get_arrivals(line_id: int):
+	return ratt.get_arrivals_from_infotrafic(line_id, get_stations())
