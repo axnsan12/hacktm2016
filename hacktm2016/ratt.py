@@ -56,19 +56,22 @@ class Station:
 
 
 class Line:
-	def __init__(self, line_id: int, line_name: str):
+	def __init__(self, line_id: int, line_name: str, line_type: str, route_name_1: str, route_name_2: str):
 		self.line_id = line_id
 		self.line_name = line_name
+		self.line_type = line_type
+		self.route_name_1 = route_name_1
+		self.route_name_2 = route_name_2
 
 	def __str__(self):
 		return self.line_name
 
 	def __repr__(self):
-		return "Line(line_id=%r, line_name=%r)" % \
-		       (self.line_id, self.line_name)
+		return "Line(line_id=%r, line_name=%r, line_type=%r, route_name_1=%r, route_name_2=%r)" % \
+		       (self.line_id, self.line_name, self.line_type, self.route_name_1, self.route_name_2)
 
 	def __eq__(self, other) -> bool:
-		return self.line_name == other.line_name
+		return self.line_id == other.line_id
 
 	def __ne__(self, other) -> bool:
 		return not self == other
