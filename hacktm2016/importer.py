@@ -1,8 +1,5 @@
-from typing import List
-
 import ratt
 import csv
-import re
 
 
 def parse_stations_from_csv(filename: str):

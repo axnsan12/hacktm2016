@@ -29,7 +29,7 @@ def get_nearby_stations():
 		response.status_code = 400
 		return response
 
-	stations = data.get_stations()
+	stations = data.get_stations().values()
 	sorted_list = []
 
 	for station in stations:
@@ -67,3 +67,9 @@ def get_routes():
 		routes_list.append({'line_id': route.line_id, 'route_id': route.route_id, 'route_name': route.route_name, 'stations': stations_dict})
 
 	return jsonify({'routes': routes_list})
+
+
+@app.route("/api/get_bike_stations")
+def get_bike_stations():
+	return jsonify({'bike_stations': [station.__dict__ for station in data.get_bike_stations()]})
+

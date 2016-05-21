@@ -2,6 +2,7 @@ from beaker.cache import CacheManager
 from beaker.util import parse_cache_config_options
 import importer
 import ratt
+import velo
 
 cache_opts = {
     'cache.type': 'file',
@@ -33,3 +34,9 @@ def get_routes():
 @cache.cache('line_arrivals', expire=30)
 def get_arrivals(line_id: int):
 	return ratt.get_arrivals_from_infotrafic(line_id, get_stations())
+
+
+@cache.cache('bike_stations', expire=3600 * 24)
+def get_bike_stations():
+	return velo.get_stations_from_velo()
+
