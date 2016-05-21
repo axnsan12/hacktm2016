@@ -57,13 +57,13 @@ def get_routes():
 	all_routes = data.get_routes()
 
 	routes = all_routes[line_id]
-	routes_dict = []
+	routes_list = []
 
 	for route in routes:
 		stations_dict = []
 		for station in route.stations:
 			stations_dict.append(station.__dict__)
 
-		routes_dict.append({'line_id': route.line_id, 'route_id': route.route_id, 'route_name': route.route_name, 'stations': stations_dict})
+		routes_list.append({'line_id': route.line_id, 'route_id': route.route_id, 'route_name': route.route_name, 'stations': stations_dict})
 
-	return jsonify({'routes': route for route in routes_dict})
+	return jsonify({'routes': routes_list})
