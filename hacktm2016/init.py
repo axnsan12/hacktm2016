@@ -4,7 +4,12 @@ The flask application package.
 
 import flask
 from flask import Flask
-from gevent import monkey; monkey.patch_all()
+import gevent
+import grequests
+patched = False
+if not patched:
+    gevent.monkey.patch_all()
+    patched = True
 
 app = Flask(__name__)
 

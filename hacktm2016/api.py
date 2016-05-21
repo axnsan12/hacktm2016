@@ -8,22 +8,35 @@ import importer
 
 @app.route("/api/get_stations")
 def get_stations():
-	stations = importer.parse_stations_from_csv("Lines Stations and Junctions - Timisoara Public Transport - Denumiri-20152012.csv")
+	stations = data.get_stations().values()
 	return jsonify({'stations': [station.__dict__ for station in stations]})
 
 
 @app.route("/api/get_lines")
 def get_lines():
-	lines = importer.parse_lines_from_csv("Lines Stations and Junctions - Timisoara Public Transport - Sheet1.csv")
+	lines = data.get_lines()
 	return jsonify({'lines': [line.__dict__ for line in lines]})
 
 
 @app.route("/api/get_nearby_stations")
 def get_nearby_stations():
+<<<<<<< HEAD
 	lat = float(request.args.get('lat'))
 	lng = float(request.args.get('lng'))
 	count = int(request.args.get('count'))
+	stations = data.get_stations().values()
+=======
+	try:
+		lat = float(request.args.get('lat'))
+		lng = float(request.args.get('lng'))
+		count = int(request.args.get('count')) if 'count' in request.args else 10
+	except (ValueError, TypeError) as e:
+		response = jsonify({'error': str(e)})
+		response.status_code = 400
+		return response
+
 	stations = data.get_stations()
+>>>>>>> origin/master
 	sorted_list = []
 
 	for station in stations:
@@ -37,3 +50,29 @@ def get_nearby_stations():
 
 	return jsonify({'stations': [sorted_list[index][0].__dict__ for index in range(count)]})
 
+
+<<<<<<< HEAD
+@app.route("/api/get_arrival_times")
+def get_arrival_times():
+	line_id = int(request.args.get('line_id'))
+	route_id = int(request.args.get('route_id'))
+	return jsonify({'arrivals': [arrival.__dict__ for arrival in data.get_arrivals(line_id)[route_id]] })
+=======
+@app.route("/api/get_routes")
+def get_routes():
+	line_id = int(request.args.get('line_id'))
+	all_routes = data.get_routes()
+
+	routes = all_routes[line_id]
+	routes_dict = []
+
+	for route in routes:
+		stations_dict = []
+		for station in route.stations:
+			stations_dict.append(station.__dict__)
+
+		routes_dict.append({'line_id': route.line_id, 'route_id': route.route_id, 'route_name': route.route_name, 'stations': stations_dict})
+
+	return jsonify({'routes': route for route in routes_dict})
+
+>>>>>>> origin/master
